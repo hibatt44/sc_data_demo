@@ -13,7 +13,7 @@ export default async function DistrictsPage() {
       <div className="bg-sc-navy text-white relative">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-14">
           <Breadcrumb crumbs={[
-            { label: 'State Overview', href: '/' },
+            { label: 'State Overview', href: '/reportcard/' },
             { label: 'All Districts' },
           ]} />
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-white mt-4 mb-2">

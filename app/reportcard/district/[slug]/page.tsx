@@ -33,7 +33,6 @@ export default async function DistrictPage({ params }: Props) {
   const stateDemo = hasDemographicProfileData(overview.demographics) ? overview.demographics : undefined;
   const hasDistrictDemographics = hasDemographicProfileData(district.enrollment);
 
-  // Compute school type distribution from district's schools
   const typeDist = district.schools.reduce((acc, s) => {
     acc[s.gradeBand] = (acc[s.gradeBand] ?? 0) + 1;
     return acc;
@@ -50,8 +49,8 @@ export default async function DistrictPage({ params }: Props) {
       <div className="bg-sc-navy text-white relative">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-14">
           <Breadcrumb crumbs={[
-            { label: 'State Overview', href: '/' },
-            { label: 'Districts', href: '/districts/' },
+            { label: 'State Overview', href: '/reportcard/' },
+            { label: 'Districts', href: '/reportcard/districts/' },
             { label: district.name },
           ]} />
           <h1 className="font-display text-3xl sm:text-5xl font-bold text-white mt-5 mb-3 leading-tight">
@@ -69,7 +68,6 @@ export default async function DistrictPage({ params }: Props) {
       {/* ── Content ─────────────────────────────────────────────── */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 space-y-6">
 
-        {/* Demographics card */}
         {hasDistrictDemographics && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-100 px-8 py-10">
             <h2 className="font-display text-2xl font-bold text-sc-text mb-2">
@@ -91,7 +89,6 @@ export default async function DistrictPage({ params }: Props) {
           </div>
         )}
 
-        {/* School type breakdown card */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 px-8 py-10">
           <h2 className="font-display text-2xl font-bold text-sc-text mb-2">
             How are {shortName}'s schools organized?
@@ -102,7 +99,6 @@ export default async function DistrictPage({ params }: Props) {
           <SchoolTypeBreakdown distribution={typeDist} totalSchools={district.schoolCount} />
         </div>
 
-        {/* School list card */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 px-8 py-10">
           <SchoolList schools={district.schools} />
         </div>

@@ -14,7 +14,7 @@ export function SiteHeader() {
       </a>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 gap-4">
-          <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
+          <Link href="/reportcard/" className="flex items-center gap-3 flex-shrink-0 group">
             <div className="w-8 h-8 bg-sc-gold flex items-center justify-center font-display font-bold text-sc-navy text-xs select-none">
               SC
             </div>
@@ -28,8 +28,8 @@ export function SiteHeader() {
           </div>
 
           <nav aria-label="Primary navigation" className="hidden md:flex items-center gap-6 text-xs font-medium tracking-wider uppercase">
-            <Link href="/" className="text-gray-300 hover:text-sc-gold transition-colors">Overview</Link>
-            <Link href="/districts/" className="text-gray-300 hover:text-sc-gold transition-colors">Districts</Link>
+            <Link href="/reportcard/" className="text-gray-300 hover:text-sc-gold transition-colors">Overview</Link>
+            <Link href="/reportcard/districts/" className="text-gray-300 hover:text-sc-gold transition-colors">Districts</Link>
           </nav>
         </div>
       </div>

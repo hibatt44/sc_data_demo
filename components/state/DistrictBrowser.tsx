@@ -95,7 +95,7 @@ export function DistrictBrowser({ districts }: { districts: District[] }) {
               {dists.map(d => (
                 <Link
                   key={d.id}
-                  href={`/district/${d.slug}/`}
+                  href={`/reportcard/district/${d.slug}/`}
                   className="flex items-center gap-4 py-3 px-2 -mx-2 rounded hover:bg-white hover:shadow-sm transition-all group"
                 >
                   <div className="flex-1 min-w-0">

@@ -2,8 +2,6 @@ import type { Metadata } from 'next';
 import { Bitter } from 'next/font/google';
 import { Public_Sans } from 'next/font/google';
 import './globals.css';
-import { SiteHeader } from '@/components/layout/SiteHeader';
-import { SiteFooter } from '@/components/layout/SiteFooter';
 
 const bitter = Bitter({
   subsets: ['latin'],
@@ -31,11 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${bitter.variable} ${publicSans.variable}`}>
       <body className="font-sans">
-        <SiteHeader />
-        <main id="main-content" tabIndex={-1}>
-          {children}
-        </main>
-        <SiteFooter />
+        {children}
       </body>
     </html>
   );

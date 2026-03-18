@@ -70,7 +70,7 @@ export function SchoolList({ schools }: { schools: School[] }) {
             {sorted.map(school => (
               <tr key={school.id} className="hover:bg-sc-cream transition-colors">
                 <td className="py-3 pr-4">
-                  <Link href={`/school/${school.slug}/`} className="font-medium text-sc-blue hover:text-sc-navy hover:underline">
+                  <Link href={`/reportcard/school/${school.slug}/`} className="font-medium text-sc-blue hover:text-sc-navy hover:underline">
                     {school.name}
                   </Link>
                 </td>

@@ -32,8 +32,8 @@ export default async function SchoolPage({ params }: Props) {
   return (
     <PageContainer>
       <Breadcrumb crumbs={[
-        { label: 'State Overview', href: '/' },
-        { label: district?.name ?? 'District', href: `/district/${school.districtSlug}/` },
+        { label: 'State Overview', href: '/reportcard/' },
+        { label: district?.name ?? 'District', href: `/reportcard/district/${school.districtSlug}/` },
         { label: school.name },
       ]} />
 
