@@ -371,6 +371,22 @@ def match_superintendent(district_name: str) -> "str | None":
     return None
 
 
+def match_supt_email(district_name: str) -> "str | None":
+    """Try to match a district name to a verified superintendent email."""
+    name_lower = district_name.lower()
+    name_norm = normalize_district(district_name)
+    for pattern in sorted(SUPT_EMAILS.keys(), key=len, reverse=True):
+        email = SUPT_EMAILS[pattern]
+        if ".*" in pattern:
+            if re.search(pattern, name_lower) or re.search(pattern, name_norm):
+                return email
+        else:
+            pat = re.escape(pattern)
+            if re.search(rf"(?:^|[\s/])({pat})", name_lower) or re.search(rf"(?:^|[\s/])({pat})", name_norm):
+                return email
+    return None
+
+
 def match_mascot(school_name: str) -> "str | None":
     """Try to match a school name to a mascot."""
     name_norm = normalize(school_name)
@@ -434,21 +450,51 @@ def fake_principal(school_id: str) -> tuple[str, str]:
     return name, email
 
 
-def fake_supt_email(district_name: str, supt_name: str) -> str:
-    """Generate a fake email for a real superintendent."""
-    parts = supt_name.replace("Dr. ", "").replace("Mr. ", "").replace("Mrs. ", "").replace("Ms. ", "").split()
-    if len(parts) >= 2:
-        first = re.sub(r"[^a-z]", "", parts[0].lower())
-        last = re.sub(r"[^a-z]", "", parts[-1].lower())
-        # Build domain slug from district name
-        slug = normalize(district_name)
-        slug = re.sub(r"\b(county|school|district|public|schools|of|the)\b", " ", slug)
-        slug = re.sub(r"\s+", "", slug).strip()
-        slug = re.sub(r"[^a-z0-9]", "", slug)
-        if not slug:
-            slug = "district"
-        return f"{first}.{last}@{slug}.k12.sc.us (demo)"
-    return ""
+# ── Verified superintendent email addresses ──────────────────────────────────────
+# Sources: SCDE Superintendent Contact List (2020), SCDE Federal Programs Contact
+# List (2026), individual district websites. Only verified addresses are included.
+SUPT_EMAILS: dict[str, str] = {
+    # From SCDE 2020 (same superintendent still in role)
+    "anderson 3": "hippk@acsd3.org",
+    "barnwell": "cstapleton@bsd45.net",
+    "beaufort": "Francisco.Rodriguez@beaufort.k12.sc.us",
+    "charter institute": "crunyan@erskinecharters.org",
+    "clarendon": "sjohnson@csd2.org",
+    "dillon 4": "rogersr@dillon.k12.sc.us",
+    "edgefield": "kogorman@edgefield.k12.sc.us",
+    "florence 1": "romalley@fsd1.org",
+    "florence 2": "nvincent@fsd2.org",
+    "greenville": "wroyster@greenville.k12.sc.us",
+    "juvenile justice": "FloydDLyles@djj.sc.gov",
+    "laurens 56": "davidoshields@lcsd56g.com",
+    "lexington 3": "aatkinson@lex3.org",
+    "marion": "kbethea@marion.k12.sc.us",
+    "mccormick": "hembreej@mccormick.k12.sc.us",
+    "orangeburg": "shawn.foster@ocsdsc.org",
+    "pickens": "dannymerck@pickens.k12.sc.us",
+    "public charter school district": "Cneeley@sccharter.org",
+    "spartanburg 5": "randall.gary@spart5.net",
+    "spartanburg 7": "JStevens@spart7.org",
+    "union": "jhaney@union.k12.sc.us",
+    "york 2": "Sheila.Quinn@clover.k12.sc.us",
+    "saluda": "hlivingston@saludaschools.org",
+    # From SCDE 2026 Federal Programs Contact List (current supt appears)
+    "allendale": "cavev@acs.k12.sc.us",
+    "anderson 1": "Youngs@apps.anderson1.org",
+    "berkeley": "dixona@bcsdschools.net",
+    "calhoun": "ftullock@ccpsonline.net",
+    "florence 5": "bgoins@fsd5.org",
+    "laurens 55": "jpenland@laurens55.org",
+    "lee": "mcdanielb@lee.k12.sc.us",
+    "spartanburg 6": "kiserkb@spart6.org",
+    "greenwood 52": "btaylor@greenwood52.org",
+    # From district website / web search
+    "aiken": "cmurphy3@acpsd.net",
+    # Generic role-based emails (verified, forwarded to current superintendent)
+    "charleston": "superintendent@charleston.k12.sc.us",
+    "richland 1": "R1-Superintendent@richlandone.org",
+    "richland 2": "superintendent@richland2.org",
+}
 
 
 def main() -> None:
@@ -460,16 +506,27 @@ def main() -> None:
     total_schools = 0
 
     for district in data["districts"]:
+        # Clear any previous enrichment data
+        district.pop("superintendentName", None)
+        district.pop("superintendentEmail", None)
+
         # Match superintendent
         supt = match_superintendent(district["name"])
         if supt:
             district["superintendentName"] = supt
-            district["superintendentEmail"] = fake_supt_email(district["name"], supt)
             supt_matched += 1
+            # Look up verified email
+            email = match_supt_email(district["name"])
+            if email:
+                district["superintendentEmail"] = email
 
         # Pass 1: Match mascots directly for all schools
         for school in district["schools"]:
             total_schools += 1
+            # Clear previous enrichment
+            school.pop("mascot", None)
+            school.pop("principalName", None)
+            school.pop("principalEmail", None)
             mascot = match_mascot(school["name"])
             if mascot:
                 school["mascot"] = mascot
@@ -512,7 +569,9 @@ def main() -> None:
 
     DATA_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
+    email_count = sum(1 for d in data["districts"] if d.get("superintendentEmail"))
     print(f"Superintendents: {supt_matched}/{len(data['districts'])} matched")
+    print(f"Supt emails (verified): {email_count}/{len(data['districts'])}")
     print(f"Mascots: {mascot_matched}/{total_schools} matched")
     print(f"Principals (demo): {principal_count}/{total_schools}")
     print(f"Wrote {DATA_FILE}")

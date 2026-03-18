@@ -79,7 +79,12 @@ export function BriefingCard({ district, stateOverview, stateAcademics }: Props)
             <div>
               <p className="text-white font-semibold text-sm">{district.superintendentName}</p>
               {district.superintendentEmail && (
-                <p className="text-blue-300 text-xs">{district.superintendentEmail}</p>
+                <a
+                  href={`mailto:${district.superintendentEmail}`}
+                  className="inline-block text-blue-300 text-xs underline underline-offset-2 py-1 active:text-blue-100 transition-colors"
+                >
+                  {district.superintendentEmail}
+                </a>
               )}
             </div>
           ) : (
@@ -87,97 +92,103 @@ export function BriefingCard({ district, stateOverview, stateAcademics }: Props)
           )}
         </div>
 
-        {/* Key talking points */}
-        <div className="mt-4 pt-4 border-t border-white/15">
-          <p className="text-blue-400 text-xs font-semibold uppercase tracking-widest mb-3">
-            Key talking points
-          </p>
-          <ul className="space-y-2 text-sm text-blue-100">
-            <li className="flex gap-2">
-              <span className="text-sc-gold flex-shrink-0">•</span>
-              <span>
-                <strong className="text-white">{district.enrollment.total.toLocaleString()}</strong> students
-                across <strong className="text-white">{district.schoolCount}</strong> schools
-              </span>
-            </li>
-            {district.enrollment.percentEconomicallyDisadvantaged != null && (
+        {/* ── Two-column: Key Data Points + Political Context ───── */}
+        <div className="mt-4 pt-4 border-t border-white/15 grid grid-cols-2 gap-6">
+          {/* Left: Key data points */}
+          <div>
+            <p className="text-blue-400 text-xs font-semibold uppercase tracking-widest mb-3">
+              Key data points
+            </p>
+            <ul className="space-y-2 text-sm text-blue-100">
               <li className="flex gap-2">
                 <span className="text-sc-gold flex-shrink-0">•</span>
                 <span>
-                  <strong className="text-white">{district.enrollment.percentEconomicallyDisadvantaged.toFixed(0)}%</strong> economically disadvantaged
+                  <strong className="text-white">{district.enrollment.total.toLocaleString()}</strong> students
+                  across <strong className="text-white">{district.schoolCount}</strong> schools
                 </span>
               </li>
-            )}
-            {largestSchool && (
-              <li className="flex gap-2">
-                <span className="text-sc-gold flex-shrink-0">•</span>
-                <span>
-                  Largest school: <strong className="text-white">{largestSchool.name}</strong>
-                  {' '}({largestSchool.enrollment.total.toLocaleString()} students)
-                </span>
-              </li>
-            )}
-            {district.teachers.averageSalary != null && (
-              <li className="flex gap-2">
-                <span className="text-sc-gold flex-shrink-0">•</span>
-                <span>
-                  Avg teacher salary: <strong className="text-white">${Math.round(district.teachers.averageSalary).toLocaleString()}</strong>
-                </span>
-              </li>
-            )}
-            {district.academics.graduationRate != null && (
-              <li className="flex gap-2">
-                <span className="text-sc-gold flex-shrink-0">•</span>
-                <span>
-                  Graduation rate: <strong className="text-white">{district.academics.graduationRate.toFixed(0)}%</strong>
-                  {stateAcademics.graduationRate != null && (
-                    <span className={district.academics.graduationRate >= stateAcademics.graduationRate ? 'text-emerald-300' : 'text-amber-300'}>
-                      {' '}({district.academics.graduationRate >= stateAcademics.graduationRate ? 'above' : 'below'} state avg)
-                    </span>
-                  )}
-                </span>
-              </li>
-            )}
-          </ul>
+              {district.enrollment.percentEconomicallyDisadvantaged != null && (
+                <li className="flex gap-2">
+                  <span className="text-sc-gold flex-shrink-0">•</span>
+                  <span>
+                    <strong className="text-white">{district.enrollment.percentEconomicallyDisadvantaged.toFixed(0)}%</strong> economically disadvantaged
+                  </span>
+                </li>
+              )}
+              {largestSchool && (
+                <li className="flex gap-2">
+                  <span className="text-sc-gold flex-shrink-0">•</span>
+                  <span>
+                    Largest school: <strong className="text-white">{largestSchool.name}</strong>
+                    {' '}({largestSchool.enrollment.total.toLocaleString()} students)
+                  </span>
+                </li>
+              )}
+              {district.teachers.averageSalary != null && (
+                <li className="flex gap-2">
+                  <span className="text-sc-gold flex-shrink-0">•</span>
+                  <span>
+                    Avg teacher salary: <strong className="text-white">${Math.round(district.teachers.averageSalary).toLocaleString()}</strong>
+                  </span>
+                </li>
+              )}
+              {district.academics.graduationRate != null && (
+                <li className="flex gap-2">
+                  <span className="text-sc-gold flex-shrink-0">•</span>
+                  <span>
+                    Graduation rate: <strong className="text-white">{district.academics.graduationRate.toFixed(0)}%</strong>
+                    {stateAcademics.graduationRate != null && (
+                      <span className={district.academics.graduationRate >= stateAcademics.graduationRate ? 'text-emerald-300' : 'text-amber-300'}>
+                        {' '}({district.academics.graduationRate >= stateAcademics.graduationRate ? 'above' : 'below'} state avg)
+                      </span>
+                    )}
+                  </span>
+                </li>
+              )}
+            </ul>
+          </div>
+
+          {/* Right: Political & civic context */}
+          <div>
+            <div className="flex items-center gap-1.5 mb-3">
+              <span className="text-sc-gold text-sm">⚑</span>
+              <p className="text-sc-gold text-xs font-semibold uppercase tracking-widest">
+                Political context
+              </p>
+            </div>
+            <div className="space-y-0">
+              <div className="flex flex-col py-2 border-b border-white/10">
+                <span className="text-blue-400 text-xs font-medium">US Congress Rep</span>
+                <span className="text-blue-300/50 italic text-sm">Not in dataset</span>
+              </div>
+              <div className="flex flex-col py-2 border-b border-white/10">
+                <span className="text-blue-400 text-xs font-medium">State Senator</span>
+                <span className="text-blue-300/50 italic text-sm">Not in dataset</span>
+              </div>
+              <div className="flex flex-col py-2 border-b border-white/10">
+                <span className="text-blue-400 text-xs font-medium">State House Rep</span>
+                <span className="text-blue-300/50 italic text-sm">Not in dataset</span>
+              </div>
+              <div className="flex flex-col py-2 border-b border-white/10">
+                <span className="text-blue-400 text-xs font-medium">County seat</span>
+                <span className="text-blue-300/50 italic text-sm">Not in dataset</span>
+              </div>
+              <div className="flex flex-col py-2 border-b border-white/10">
+                <span className="text-blue-400 text-xs font-medium">Property tax base</span>
+                <span className="text-blue-300/50 italic text-sm">Not in dataset</span>
+              </div>
+              <div className="flex flex-col py-2">
+                <span className="text-blue-400 text-xs font-medium">Per-pupil local funding</span>
+                <span className="text-blue-300/50 italic text-sm">Not in dataset</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── Political & civic context ────────────────────────────── */}
-      <Section label="Political &amp; civic context" accent>
-        <p className="text-stone-500 text-xs mb-4 -mt-1 leading-relaxed">
-          Legislative representation and local funding context for this district.
-          This section will be populated with data from the SC Legislature and Revenue &amp; Fiscal Affairs Office.
-        </p>
-        <div className="grid grid-cols-2 gap-x-6">
-          <div>
-            <div className="flex flex-col py-3 border-b border-stone-200/60">
-              <span className="text-stone-400 text-xs uppercase tracking-wide">US Congress</span>
-              <span className="text-stone-300 italic text-sm mt-0.5">Not in dataset</span>
-            </div>
-            <div className="flex flex-col py-3 border-b border-stone-200/60">
-              <span className="text-stone-400 text-xs uppercase tracking-wide">State Senate</span>
-              <span className="text-stone-300 italic text-sm mt-0.5">Not in dataset</span>
-            </div>
-            <div className="flex flex-col py-3">
-              <span className="text-stone-400 text-xs uppercase tracking-wide">State House</span>
-              <span className="text-stone-300 italic text-sm mt-0.5">Not in dataset</span>
-            </div>
-          </div>
-          <div>
-            <div className="flex flex-col py-3 border-b border-stone-200/60">
-              <span className="text-stone-400 text-xs uppercase tracking-wide">County seat</span>
-              <span className="text-stone-300 italic text-sm mt-0.5">Not in dataset</span>
-            </div>
-            <div className="flex flex-col py-3 border-b border-stone-200/60">
-              <span className="text-stone-400 text-xs uppercase tracking-wide">Property tax base</span>
-              <span className="text-stone-300 italic text-sm mt-0.5">Not in dataset</span>
-            </div>
-            <div className="flex flex-col py-3">
-              <span className="text-stone-400 text-xs uppercase tracking-wide">Per-pupil local funding</span>
-              <span className="text-stone-300 italic text-sm mt-0.5">Not in dataset</span>
-            </div>
-          </div>
-        </div>
+      {/* ── Schools ── full width span ─────────────────────────── */}
+      <Section label={`Schools · ${district.schoolCount} total`}>
+        <SchoolTouchList schools={district.schools} />
       </Section>
 
       {/* ── Student population ───────────────────────────────────── */}
@@ -212,11 +223,6 @@ export function BriefingCard({ district, stateOverview, stateAcademics }: Props)
         <Stub label="District chronic absenteeism rate" />
         <Stub label="Change year-over-year" />
         <Stub label="Most affected schools" />
-      </Section>
-
-      {/* ── Schools ─────────────────────────────────────────────── */}
-      <Section label={`Schools · ${district.schoolCount} total`}>
-        <SchoolTouchList schools={district.schools} />
       </Section>
 
       {/* ── Academics ───────────────────────────────────────────── */}
