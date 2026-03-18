@@ -38,16 +38,25 @@ def write_search_index() -> None:
     print(f"Wrote {len(payload['districts'])} districts, {payload['stateOverview']['totalSchools']} schools")
 
 
+def enrich() -> None:
+    """Run the enrichment script to add superintendent, principal, mascot data."""
+    enrich_script = ROOT / "scripts" / "enrich_data.py"
+    if enrich_script.exists() and OUT_JSON.exists():
+        subprocess.run([sys.executable, str(enrich_script)], check=True)
+
+
 def main() -> None:
     if RAW_XLSX.exists():
         subprocess.run(
             [sys.executable, str(ROOT / "scripts" / "parse_report_card_xlsx.py"), str(RAW_XLSX), str(OUT_JSON)],
             check=True,
         )
+        enrich()
         write_search_index()
         return
 
     if OUT_JSON.exists():
+        enrich()
         write_search_index()
         return
 

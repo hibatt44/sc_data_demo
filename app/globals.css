@@ -36,3 +36,12 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* Storyboard page enter transition */
+@keyframes sb-slide-in {
+  from { opacity: 0; transform: translateX(1.5rem); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.sb-enter {
+  animation: sb-slide-in 0.3s ease-out both;
+}

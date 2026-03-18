@@ -23,7 +23,7 @@ export default function StoryboardLayout({ children }: { children: React.ReactNo
           </Link>
         </div>
       </header>
-      <main>
+      <main className="sb-enter">
         {children}
       </main>
     </div>

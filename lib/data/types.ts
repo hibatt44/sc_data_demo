@@ -36,6 +36,9 @@ export interface School {
   academics: AcademicMetrics;
   teachers: TeacherMetrics;
   reportYear: number;
+  principalName?: string;
+  principalEmail?: string;
+  mascot?: string;
 }
 
 export interface District {
@@ -49,6 +52,8 @@ export interface District {
   schoolCount: number;
   schools: School[];
   reportYear: number;
+  superintendentName?: string;
+  superintendentEmail?: string;
 }
 
 export interface StateOverview {

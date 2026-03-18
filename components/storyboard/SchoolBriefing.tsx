@@ -1,109 +1,16 @@
-import type { School, SchoolRating } from '@/lib/data/types';
+import type { School, AcademicMetrics } from '@/lib/data/types';
+import {
+  RatingPill, GradeBadge,
+  Section, ProfBar, StatBox, FactRow, Stub, StabilityMeter,
+} from './primitives';
 
 interface Props {
   school: School;
   districtName?: string;
+  districtAcademics?: AcademicMetrics;
 }
 
-// ── Shared primitives ──────────────────────────────────────────────────────────
-
-const RATING_PILL: Record<SchoolRating, string> = {
-  'Excellent':      'bg-emerald-50 text-emerald-700 border-emerald-200',
-  'Good':           'bg-teal-50 text-teal-700 border-teal-200',
-  'Average':        'bg-amber-50 text-amber-700 border-amber-200',
-  'Below Average':  'bg-orange-50 text-orange-700 border-orange-200',
-  'Unsatisfactory': 'bg-red-50 text-red-700 border-red-200',
-  'Not Rated':      'bg-stone-50 text-stone-500 border-stone-200',
-};
-const RATING_DOT: Record<SchoolRating, string> = {
-  'Excellent':      'bg-emerald-500',
-  'Good':           'bg-teal-500',
-  'Average':        'bg-amber-400',
-  'Below Average':  'bg-orange-500',
-  'Unsatisfactory': 'bg-red-500',
-  'Not Rated':      'bg-stone-300',
-};
-const GRADE_COLOR: Record<string, string> = {
-  Elementary: 'bg-blue-100 text-blue-700',
-  Middle:     'bg-violet-100 text-violet-700',
-  High:       'bg-teal-100 text-teal-700',
-  'K-12':     'bg-amber-100 text-amber-700',
-  Other:      'bg-stone-100 text-stone-600',
-};
-
-function RatingPill({ rating }: { rating: SchoolRating }) {
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-semibold flex-shrink-0 ${RATING_PILL[rating]}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${RATING_DOT[rating]}`} />
-      {rating}
-    </span>
-  );
-}
-
-function Section({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <section className="bg-white rounded-2xl border border-stone-200 shadow-sm px-5 py-5">
-      <h2 className="text-stone-400 text-xs font-semibold uppercase tracking-widest mb-4">{label}</h2>
-      {children}
-    </section>
-  );
-}
-
-function ProfBar({ label, value }: { label: string; value?: number }) {
-  if (value == null) return null;
-  const pct = Math.min(100, Math.max(0, value));
-  const color = value >= 70 ? 'bg-emerald-500' : value >= 50 ? 'bg-amber-400' : 'bg-red-400';
-  return (
-    <div>
-      <div className="flex justify-between items-baseline mb-1.5">
-        <span className="text-stone-600 text-sm">{label}</span>
-        <span className="font-bold text-stone-900 text-sm tabular-nums">{value.toFixed(0)}%</span>
-      </div>
-      <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
-        <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
-      </div>
-    </div>
-  );
-}
-
-function FactRow({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <div className="flex items-center justify-between py-2.5 border-b border-stone-100 last:border-0">
-      <div>
-        <div className="text-stone-600 text-sm">{label}</div>
-        {sub && <div className="text-stone-400 text-xs mt-0.5">{sub}</div>}
-      </div>
-      <span className="text-stone-900 font-semibold text-sm tabular-nums">{value}</span>
-    </div>
-  );
-}
-
-function Stub({ label }: { label: string }) {
-  return (
-    <div className="flex items-center justify-between py-2.5 border-b border-stone-100 last:border-0">
-      <span className="text-stone-600 text-sm">{label}</span>
-      <span className="text-xs text-stone-300 bg-stone-100 px-2 py-0.5 rounded-full">Not in dataset</span>
-    </div>
-  );
-}
-
-// ── Stability indicator ────────────────────────────────────────────────────────
-
-function StabilityMeter({ pct }: { pct: number }) {
-  const label = pct >= 90 ? 'Stable' : pct >= 75 ? 'Moderate' : 'Unstable';
-  const color = pct >= 90 ? 'text-emerald-600 bg-emerald-50 border-emerald-200'
-              : pct >= 75 ? 'text-amber-600 bg-amber-50 border-amber-200'
-              : 'text-red-600 bg-red-50 border-red-200';
-  return (
-    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${color}`}>
-      {label}
-    </span>
-  );
-}
-
-// ── Main component ─────────────────────────────────────────────────────────────
-
-export function SchoolBriefing({ school, districtName }: Props) {
+export function SchoolBriefing({ school, districtName, districtAcademics }: Props) {
   const hasAcademics =
     school.academics.elaProficiencyPercent != null ||
     school.academics.mathProficiencyPercent != null;
@@ -127,42 +34,124 @@ export function SchoolBriefing({ school, districtName }: Props) {
           <RatingPill rating={school.rating} />
         </div>
         <div className="flex items-center gap-3 mt-3">
-          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${GRADE_COLOR[school.gradeBand] ?? GRADE_COLOR.Other}`}>
-            {school.gradeBand}
-          </span>
+          <GradeBadge band={school.gradeBand} />
+          {school.mascot && (
+            <span className="text-blue-200 text-sm">The <strong className="text-white">{school.mascot}</strong></span>
+          )}
           <span className="text-blue-300 text-sm">{school.reportYear} Report Card</span>
+        </div>
+
+        {/* Principal + mascot */}
+        <div className="mt-4 pt-3 border-t border-white/10 grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-blue-400 text-xs uppercase tracking-wide mb-0.5">Principal</p>
+            {school.principalName ? (
+              <div>
+                <p className="text-white font-semibold text-sm">{school.principalName}</p>
+                {school.principalEmail && (
+                  <p className="text-blue-300 text-xs">{school.principalEmail}</p>
+                )}
+              </div>
+            ) : (
+              <p className="text-blue-400/60 text-sm italic">Not in dataset</p>
+            )}
+          </div>
+          <div>
+            <p className="text-blue-400 text-xs uppercase tracking-wide mb-0.5">School mascot</p>
+            {school.mascot ? (
+              <p className="text-white font-semibold text-sm">{school.mascot}</p>
+            ) : (
+              <p className="text-blue-400/60 text-sm italic">Not in dataset</p>
+            )}
+          </div>
+        </div>
+
+        {/* Key talking points */}
+        <div className="mt-4 pt-4 border-t border-white/15">
+          <p className="text-blue-400 text-xs font-semibold uppercase tracking-widest mb-3">
+            Key talking points
+          </p>
+          <ul className="space-y-2 text-sm text-blue-100">
+            <li className="flex gap-2">
+              <span className="text-sc-gold flex-shrink-0">•</span>
+              <span>
+                <strong className="text-white">{school.gradeBand} school</strong> with{' '}
+                <strong className="text-white">{school.enrollment.total.toLocaleString()}</strong> students
+              </span>
+            </li>
+            {school.enrollment.percentEconomicallyDisadvantaged != null && (
+              <li className="flex gap-2">
+                <span className="text-sc-gold flex-shrink-0">•</span>
+                <span>
+                  <strong className="text-white">{school.enrollment.percentEconomicallyDisadvantaged.toFixed(0)}%</strong> economically disadvantaged
+                </span>
+              </li>
+            )}
+            {school.academics.elaProficiencyPercent != null && school.academics.mathProficiencyPercent != null && (
+              <li className="flex gap-2">
+                <span className="text-sc-gold flex-shrink-0">•</span>
+                <span>
+                  Proficiency: <strong className="text-white">{school.academics.elaProficiencyPercent.toFixed(0)}%</strong> ELA,{' '}
+                  <strong className="text-white">{school.academics.mathProficiencyPercent.toFixed(0)}%</strong> Math
+                  {districtAcademics?.elaProficiencyPercent != null && (
+                    <span className={
+                      school.academics.elaProficiencyPercent >= districtAcademics.elaProficiencyPercent
+                        ? 'text-emerald-300' : 'text-amber-300'
+                    }>
+                      {' '}({school.academics.elaProficiencyPercent >= districtAcademics.elaProficiencyPercent ? 'above' : 'below'} district avg)
+                    </span>
+                  )}
+                </span>
+              </li>
+            )}
+            {school.academics.graduationRate != null && (
+              <li className="flex gap-2">
+                <span className="text-sc-gold flex-shrink-0">•</span>
+                <span>
+                  Graduation rate: <strong className="text-white">{school.academics.graduationRate.toFixed(0)}%</strong>
+                </span>
+              </li>
+            )}
+            {school.teachers.percentOnContinuingContract != null && (
+              <li className="flex gap-2">
+                <span className="text-sc-gold flex-shrink-0">•</span>
+                <span>
+                  Teacher retention: <strong className="text-white">{school.teachers.percentOnContinuingContract.toFixed(0)}%</strong> on continuing contract
+                  {school.teachers.percentOnContinuingContract < 75 && (
+                    <span className="text-amber-300"> — potential staffing concern</span>
+                  )}
+                </span>
+              </li>
+            )}
+            {school.teachers.averageSalary != null && (
+              <li className="flex gap-2">
+                <span className="text-sc-gold flex-shrink-0">•</span>
+                <span>
+                  Avg teacher salary: <strong className="text-white">${Math.round(school.teachers.averageSalary).toLocaleString()}</strong>
+                </span>
+              </li>
+            )}
+          </ul>
         </div>
       </div>
 
-      {/* ── Enrollment snapshot ─────────────────────────────────── */}
+      {/* ── Enrollment ──────────────────────────────────────────── */}
       <Section label="Enrollment">
         <div className="grid grid-cols-3 gap-4 mb-4">
-          <div className="text-center">
-            <div className="font-display text-2xl font-bold text-stone-900 tabular-nums">
-              {school.enrollment.total.toLocaleString()}
-            </div>
-            <div className="text-stone-400 text-xs mt-0.5">students</div>
-          </div>
-          <div className="text-center">
-            <div className={`font-display text-2xl font-bold tabular-nums ${
-              (school.enrollment.percentEconomicallyDisadvantaged ?? 0) >= 70 ? 'text-orange-600'
-              : (school.enrollment.percentEconomicallyDisadvantaged ?? 0) >= 50 ? 'text-amber-600'
-              : 'text-stone-900'
-            }`}>
-              {school.enrollment.percentEconomicallyDisadvantaged != null
-                ? `${school.enrollment.percentEconomicallyDisadvantaged.toFixed(0)}%`
-                : '—'}
-            </div>
-            <div className="text-stone-400 text-xs mt-0.5">econ. disadv.</div>
-          </div>
-          <div className="text-center">
-            <div className="font-display text-2xl font-bold text-stone-900 tabular-nums">
-              {school.enrollment.percentSpecialEducation != null
-                ? `${school.enrollment.percentSpecialEducation.toFixed(0)}%`
-                : '—'}
-            </div>
-            <div className="text-stone-400 text-xs mt-0.5">special ed.</div>
-          </div>
+          <StatBox value={school.enrollment.total.toLocaleString()} label="students" />
+          <StatBox
+            value={school.enrollment.percentEconomicallyDisadvantaged != null
+              ? `${school.enrollment.percentEconomicallyDisadvantaged.toFixed(0)}%`
+              : '—'}
+            label="econ. disadv."
+            warn={(school.enrollment.percentEconomicallyDisadvantaged ?? 0) >= 70}
+          />
+          <StatBox
+            value={school.enrollment.percentSpecialEducation != null
+              ? `${school.enrollment.percentSpecialEducation.toFixed(0)}%`
+              : '—'}
+            label="special ed."
+          />
         </div>
         {school.enrollment.percentELL != null && (
           <FactRow label="English language learners" value={`${school.enrollment.percentELL.toFixed(0)}%`} />
@@ -174,58 +163,69 @@ export function SchoolBriefing({ school, districtName }: Props) {
         <p className="text-stone-400 text-xs mb-3">
           Students missing 10%+ of school days.
         </p>
-        <div className="divide-y divide-stone-100">
-          <Stub label="Chronic absenteeism rate" />
-          <Stub label="Year-over-year change" />
-        </div>
+        <Stub label="Chronic absenteeism rate" />
+        <Stub label="Year-over-year change" />
       </Section>
 
-      {/* ── Academics ───────────────────────────────────────────── */}
+      {/* ── Academics vs. district ──────────────────────────────── */}
       {hasAcademics && (
-        <Section label="Academic performance">
-          <div className="space-y-4">
-            <ProfBar label="ELA proficiency" value={school.academics.elaProficiencyPercent} />
-            <ProfBar label="Math proficiency" value={school.academics.mathProficiencyPercent} />
-            <ProfBar label="College &amp; career ready" value={school.academics.collegeCareerReadinessPercent} />
+        <Section label={districtAcademics ? 'Academic performance vs. district' : 'Academic performance'}>
+          <div className="space-y-5">
+            <ProfBar
+              label="ELA proficiency"
+              value={school.academics.elaProficiencyPercent}
+              stateAvg={districtAcademics?.elaProficiencyPercent}
+            />
+            <ProfBar
+              label="Math proficiency"
+              value={school.academics.mathProficiencyPercent}
+              stateAvg={districtAcademics?.mathProficiencyPercent}
+            />
+            <ProfBar
+              label="College &amp; career ready"
+              value={school.academics.collegeCareerReadinessPercent}
+              stateAvg={districtAcademics?.collegeCareerReadinessPercent}
+            />
             {school.academics.graduationRate != null && (
-              <ProfBar label="Graduation rate" value={school.academics.graduationRate} />
+              <ProfBar
+                label="Graduation rate"
+                value={school.academics.graduationRate}
+                stateAvg={districtAcademics?.graduationRate}
+              />
             )}
           </div>
+          {districtAcademics && (
+            <p className="text-stone-400 text-xs mt-4">
+              Dark marker = district average. <span className="text-emerald-600">▲ above</span> / <span className="text-amber-600">▼ below</span> district.
+            </p>
+          )}
         </Section>
       )}
 
       {/* ── Teacher workforce ───────────────────────────────────── */}
       {hasTeachers && (
         <Section label="Teacher workforce">
-          <div className="divide-y divide-stone-100">
-            {school.teachers.averageSalary != null && (
-              <FactRow
-                label="Average teacher salary"
-                value={`$${Math.round(school.teachers.averageSalary).toLocaleString()}`}
-              />
-            )}
-            {school.teachers.percentOnContinuingContract != null && (
-              <div className="flex items-center justify-between py-2.5 border-b border-stone-100">
-                <div>
-                  <div className="text-stone-600 text-sm">On continuing contract</div>
-                  <div className="text-stone-400 text-xs mt-0.5">Staff retention indicator</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-stone-900 font-semibold text-sm tabular-nums">
-                    {school.teachers.percentOnContinuingContract.toFixed(0)}%
-                  </span>
-                  <StabilityMeter pct={school.teachers.percentOnContinuingContract} />
-                </div>
+          {school.teachers.averageSalary != null && (
+            <FactRow label="Average teacher salary" value={`$${Math.round(school.teachers.averageSalary).toLocaleString()}`} />
+          )}
+          {school.teachers.percentOnContinuingContract != null && (
+            <div className="flex items-center justify-between py-3 border-b border-stone-100">
+              <div>
+                <div className="text-stone-600 text-sm">On continuing contract</div>
+                <div className="text-stone-400 text-xs mt-0.5">Staff retention indicator</div>
               </div>
-            )}
-            {school.teachers.percentWithAdvancedDegree != null && (
-              <FactRow
-                label="With advanced degree"
-                value={`${school.teachers.percentWithAdvancedDegree.toFixed(0)}%`}
-              />
-            )}
-          </div>
-          <div className="mt-3 divide-y divide-stone-100">
+              <div className="flex items-center gap-2">
+                <span className="text-stone-900 font-semibold text-sm tabular-nums">
+                  {school.teachers.percentOnContinuingContract.toFixed(0)}%
+                </span>
+                <StabilityMeter pct={school.teachers.percentOnContinuingContract} />
+              </div>
+            </div>
+          )}
+          {school.teachers.percentWithAdvancedDegree != null && (
+            <FactRow label="With advanced degree" value={`${school.teachers.percentWithAdvancedDegree.toFixed(0)}%`} />
+          )}
+          <div className="mt-3">
             <Stub label="Open / hard-to-fill vacancies" />
             <Stub label="Teacher turnover rate" />
           </div>
@@ -234,11 +234,9 @@ export function SchoolBriefing({ school, districtName }: Props) {
 
       {/* ── Finances ────────────────────────────────────────────── */}
       <Section label="School finances">
-        <div className="divide-y divide-stone-100">
-          <Stub label="Per-pupil expenditure" />
-          <Stub label="Title I status" />
-          <Stub label="Federal grants" />
-        </div>
+        <Stub label="Per-pupil expenditure" />
+        <Stub label="Title I status" />
+        <Stub label="Federal grants" />
       </Section>
 
     </div>
